@@ -1,7 +1,7 @@
 import cv2
 
 def get_frames(video_file):
-    cap = cv2.VideoCapture('vtest.avi')
+    cap = cv2.VideoCapture(video_file)
     list_of_frames = []
 
     while(cap.isOpened()):
