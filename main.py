@@ -3,6 +3,7 @@ import os
 import sys
 
 import synthesia_to_sheet
+import synthesia_to_sheet.parse_video
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -17,7 +18,7 @@ def get_args():
 
 def run():
     args = get_args()
-    list_of_frames = synthesia_to_sheet.parse_video.get_frames()
+    list_of_frames = synthesia_to_sheet.parse_video.get_frames(args.video_file)
     # do further processing
 
 if __name__ == '__main__':
