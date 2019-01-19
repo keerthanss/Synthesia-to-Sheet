@@ -4,9 +4,14 @@ class Note(enum):
     """docstring for Note."""
 
     Note.C = 1
-    Note.D = 2
-    Note.E = 3
-    Note.F = 4
-    Note.G = 5
-    Note.A = 6
-    Note.B = 7
+    Note.C_sharp = 2
+    Note.D = 3
+    Note.D_sharp = 4
+    Note.E = 5
+    Note.F = 6
+    Note.F_sharp = 7
+    Note.G = 8
+    Note.G_sharp = 9
+    Note.A = 10
+    Note.A_sharp = 11
+    Note.B = 12
