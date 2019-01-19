@@ -6,7 +6,11 @@ def get_frames(video_file):
 
     while(cap.isOpened()):
         ret, frame = cap.read()
-        list_of_frames += [frame]
+        if ret:
+            list_of_frames += [frame]
+        else:
+            break
+
     cap.release()
     cv2.destroyAllWindows()
 
