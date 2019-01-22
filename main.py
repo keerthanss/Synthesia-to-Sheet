@@ -18,6 +18,7 @@ def get_args():
 def run():
     args = get_args()
     list_of_frames = parse_video.get_frames(args.video_file)
+    parse_video.display_frames(list_of_frames)
     # do further processing
 
 if __name__ == '__main__':
