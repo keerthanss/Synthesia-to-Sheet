@@ -9,7 +9,7 @@ def get_frames(video_file):
     while(cap.isOpened()):
         ret, frame = cap.read()
         if i < 1000: #NOTE: temporary fix
-            list_of_frames += [frame]
+            list_of_frames.append(frame)
             i += 1
         else:
             break
@@ -25,7 +25,7 @@ def display_frames(list_of_frames):
 
     for frame in list_of_frames:
         for key in blackKeys:
-            cv2.circle(frame, key.Location, 5, (0,0,255), -1)
+            cv2.circle(frame, key.Location, 3, (0,0,255), -1)
 
         cv2.imshow('frame',frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):

@@ -34,12 +34,13 @@ def detect_all_black_keys(frame):
             M["m00"] = 1
     	cX = int(M["m10"] / M["m00"])
     	cY = int(M["m01"] / M["m00"])
-        centers += [ (cX, cY) ]
+        centers.append( (cX, cY) )
 
+    centers = sorted(centers)
     # instantiate Key() with the newly found centers
     blackKeys = []
     for p in centers:
         key = Key.Key(colour=Colour.Colour.Black, location=p, nativeColor=frame[ p[1] ][ p[0] ] ) # array indexing is inverse of image coordinates
-        blackKeys += [key]
+        blackKeys.append(key)
 
     return blackKeys
