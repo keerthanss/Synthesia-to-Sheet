@@ -2,6 +2,7 @@ import cv2
 
 from calibrate import detect_all_black_keys
 from calibrate import detect_all_white_keys
+from calibrate import get_first_C_note
 
 def get_frames(video_file):
     cap = cv2.VideoCapture(video_file)
@@ -23,7 +24,8 @@ def get_frames(video_file):
 # method for temporary testing only
 def display_frames(list_of_frames):
     blackKeys = detect_all_black_keys(list_of_frames[0])
-    whiteKeys = detect_all_white_keys(list_of_frames[0], blackKeys)
+    (whiteKeys, meanBlackDistance) = detect_all_white_keys(list_of_frames[0], blackKeys)
+    get_first_C_note(blackKeys, whiteKeys, meanBlackDistance)
 
     # for frame in list_of_frames:
     for key in blackKeys:

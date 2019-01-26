@@ -55,9 +55,16 @@ def get_white_keys_from(blackKeyLocation, distanceToNextBlackKey, meanBlackDista
 
     return locations
 
+def get_key_distances(keysList):
+    distances = []
+    for index in xrange(1, len(keysList)):
+        distances.append(keysList[index].Location[0] - keysList[index - 1].Location[0])
+
+    return distances
+
 def detect_all_white_keys(frame, blackKeys):
     height, width, channels = frame.shape
-    whiteKeys = [], blackKeyDifferences = []
+    whiteKeys = []
 
     p1 = (0, blackKeys[0].Location[1])
     dummyFirstBlackKey = Key.Key(color=Color.Color.Black, location=p1, nativeColor=frame[p1[1]][p1[0]])
@@ -69,8 +76,7 @@ def detect_all_white_keys(frame, blackKeys):
     referenceBlackKeys.insert(0, dummyFirstBlackKey)
     referenceBlackKeys.append(dummyLastBlackKey)
 
-    for index in range(1, len(referenceBlackKeys)):
-        blackKeyDifferences.append(referenceBlackKeys[index].Location[0] - referenceBlackKeys[index - 1].Location[0])
+    blackKeyDifferences = get_key_distances(referenceBlackKeys)
 
     # Mean is used to determine whether one or two white keys are present between two black keys
     if len(blackKeyDifferences) > 0:
@@ -87,4 +93,20 @@ def detect_all_white_keys(frame, blackKeys):
             whiteKeys.append(key)
         previousBlackKeyIndex += 1
 
-    return whiteKeys
+    return whiteKeys, meanBlackDistance
+
+def is_octave_pattern(lastFiveBlackKeys, meanBlackDistance):
+    octavePattern = np.array([-1, 1, -1, -1])
+    distances = np.array(get_key_distances(lastFiveBlackKeys))
+    deviationsFromMean = distances - meanBlackDistance
+    truthArray = octavePattern * deviationsFromMean
+    return (truthArray > 0).all()
+
+def get_first_C_note(blackKeys, whiteKeys, meanBlackDistance):
+    for index in xrange(len(blackKeys) - 5):
+        lastFiveBlackKeys = blackKeys[index : index+5]
+        if is_octave_pattern(lastFiveBlackKeys, meanBlackDistance):
+            print "First C# found at", lastFiveBlackKeys[0].Location
+            return
+
+    print "Couldn't compute first occurrence of C#"
