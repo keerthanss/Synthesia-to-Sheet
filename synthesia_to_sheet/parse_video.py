@@ -1,6 +1,7 @@
 import cv2
 
 from calibrate import detect_all_black_keys
+from calibrate import detect_all_white_keys
 
 def get_frames(video_file):
     cap = cv2.VideoCapture(video_file)
@@ -22,12 +23,18 @@ def get_frames(video_file):
 # method for temporary testing only
 def display_frames(list_of_frames):
     blackKeys = detect_all_black_keys(list_of_frames[0])
+    whiteKeys = detect_all_white_keys(list_of_frames[0], blackKeys)
 
-    for frame in list_of_frames:
-        for key in blackKeys:
-            cv2.circle(frame, key.Location, 3, (0,0,255), -1)
+    # for frame in list_of_frames:
+    for key in blackKeys:
+        cv2.circle(list_of_frames[0], key.Location, 3, (0,0,255), -1)
+    for key in whiteKeys:
+        cv2.circle(list_of_frames[1], key.Location, 3, (0,0,255), -1)
+        # cv2.imshow('frame',frame)
+        # if cv2.waitKey(1) & 0xFF == ord('q'):
+        #     break
 
-        cv2.imshow('frame',frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+    cv2.imwrite('blackKeysFrame.png', list_of_frames[0])
+    cv2.imwrite('whiteKeysFrame.png', list_of_frames[1])
+
     return

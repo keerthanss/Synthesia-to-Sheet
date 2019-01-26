@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
+import copy
 
-from ClassDefinitions import Key, Colour
+from ClassDefinitions import Key, Color
 
 def detect_all_black_keys(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -24,14 +25,13 @@ def detect_all_black_keys(frame):
     all_black_keys_gone = cv2.morphologyEx(segmented_normal, cv2.MORPH_CLOSE, kernel)
     only_background = cv2.bitwise_not(all_black_keys_gone)
     only_black_keys = segmented_inverted - only_background
-
     # now that we have the frame with only the black keys highlighted, find the contours and their centers
     _, contours, _ = cv2.findContours(only_black_keys,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     centers = []
     for c in contours:
         M = cv2.moments(c)
         if M["m00"] == 0:
-            M["m00"] = 1
+            continue
     	cX = int(M["m10"] / M["m00"])
     	cY = int(M["m01"] / M["m00"])
         centers.append( (cX, cY) )
@@ -40,7 +40,51 @@ def detect_all_black_keys(frame):
     # instantiate Key() with the newly found centers
     blackKeys = []
     for p in centers:
-        key = Key.Key(colour=Colour.Colour.Black, location=p, nativeColor=frame[ p[1] ][ p[0] ] ) # array indexing is inverse of image coordinates
+        key = Key.Key(color=Color.Color.Black, location=p, nativeColor=frame[ p[1] ][ p[0] ] ) # array indexing is inverse of image coordinates
         blackKeys.append(key)
 
     return blackKeys
+
+def get_white_keys_from(blackKeyLocation, distanceToNextBlackKey, meanBlackDistance):
+    locations = []
+    if distanceToNextBlackKey < meanBlackDistance:
+        locations.append((blackKeyLocation[0] + distanceToNextBlackKey / 2, blackKeyLocation[1]))
+    else:
+        locations.append((blackKeyLocation[0] + distanceToNextBlackKey / 3, blackKeyLocation[1]))
+        locations.append((blackKeyLocation[0] + 2 * distanceToNextBlackKey / 3, blackKeyLocation[1]))
+
+    return locations
+
+def detect_all_white_keys(frame, blackKeys):
+    height, width, channels = frame.shape
+    whiteKeys = [], blackKeyDifferences = []
+
+    p1 = (0, blackKeys[0].Location[1])
+    dummyFirstBlackKey = Key.Key(color=Color.Color.Black, location=p1, nativeColor=frame[p1[1]][p1[0]])
+    p2 = (width - 1, blackKeys[-1].Location[1])
+    dummyLastBlackKey = Key.Key(color=Color.Color.Black, location=p2, nativeColor=frame[p2[1]][p2[0]])
+
+    # Add dummy black keys to the end and beginning to be able to detect white keys beyond the first and last actual black keys
+    referenceBlackKeys = copy.deepcopy(blackKeys)
+    referenceBlackKeys.insert(0, dummyFirstBlackKey)
+    referenceBlackKeys.append(dummyLastBlackKey)
+
+    for index in range(1, len(referenceBlackKeys)):
+        blackKeyDifferences.append(referenceBlackKeys[index].Location[0] - referenceBlackKeys[index - 1].Location[0])
+
+    # Mean is used to determine whether one or two white keys are present between two black keys
+    if len(blackKeyDifferences) > 0:
+        meanBlackDistance = sum(blackKeyDifferences) / len(blackKeyDifferences)
+    else:
+        print "List of blackKeyDifferences is empty"
+        exit(0)
+
+    previousBlackKeyIndex = 0
+    for diff in blackKeyDifferences:
+        whiteKeyLocations = get_white_keys_from(referenceBlackKeys[previousBlackKeyIndex].Location, diff, meanBlackDistance)
+        for p in whiteKeyLocations:
+            key = Key.Key(color=Color.Color.White, location=p, nativeColor=frame[ p[1] ][ p[0] ] )
+            whiteKeys.append(key)
+        previousBlackKeyIndex += 1
+
+    return whiteKeys
