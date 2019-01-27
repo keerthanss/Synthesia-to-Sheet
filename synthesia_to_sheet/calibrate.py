@@ -4,6 +4,11 @@ import copy
 
 from ClassDefinitions import Key, Color
 
+# Global variables
+blackKeys = []
+whiteKeys = []
+meanBlackDistance = None
+
 def detect_all_black_keys(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (15,15), 0) #NOTE: This number may change. Needs more testing.
@@ -38,14 +43,11 @@ def detect_all_black_keys(frame):
 
     centers = sorted(centers)
     # instantiate Key() with the newly found centers
-    blackKeys = []
     for p in centers:
         key = Key.Key(color=Color.Color.Black, location=p, nativeColor=frame[ p[1] ][ p[0] ] ) # array indexing is inverse of image coordinates
         blackKeys.append(key)
 
-    return blackKeys
-
-def get_white_keys_from(blackKeyLocation, distanceToNextBlackKey, meanBlackDistance):
+def get_white_keys_from(blackKeyLocation, distanceToNextBlackKey):
     locations = []
     if distanceToNextBlackKey < meanBlackDistance:
         locations.append((blackKeyLocation[0] + distanceToNextBlackKey / 2, blackKeyLocation[1]))
@@ -62,9 +64,9 @@ def get_key_distances(keysList):
 
     return distances
 
-def detect_all_white_keys(frame, blackKeys):
+def detect_all_white_keys(frame):
+    global meanBlackDistance
     height, width, channels = frame.shape
-    whiteKeys = []
 
     p1 = (0, blackKeys[0].Location[1])
     dummyFirstBlackKey = Key.Key(color=Color.Color.Black, location=p1, nativeColor=frame[p1[1]][p1[0]])
@@ -87,26 +89,52 @@ def detect_all_white_keys(frame, blackKeys):
 
     previousBlackKeyIndex = 0
     for diff in blackKeyDifferences:
-        whiteKeyLocations = get_white_keys_from(referenceBlackKeys[previousBlackKeyIndex].Location, diff, meanBlackDistance)
+        whiteKeyLocations = get_white_keys_from(referenceBlackKeys[previousBlackKeyIndex].Location, diff)
         for p in whiteKeyLocations:
             key = Key.Key(color=Color.Color.White, location=p, nativeColor=frame[ p[1] ][ p[0] ] )
             whiteKeys.append(key)
         previousBlackKeyIndex += 1
 
-    return whiteKeys, meanBlackDistance
-
-def is_octave_pattern(lastFiveBlackKeys, meanBlackDistance):
+def is_octave_pattern(lastFiveBlackKeys):
     octavePattern = np.array([-1, 1, -1, -1])
     distances = np.array(get_key_distances(lastFiveBlackKeys))
     deviationsFromMean = distances - meanBlackDistance
     truthArray = octavePattern * deviationsFromMean
     return (truthArray > 0).all()
 
-def get_first_C_note(blackKeys, whiteKeys, meanBlackDistance):
+def get_index_of_first_C():
     for index in xrange(len(blackKeys) - 5):
         lastFiveBlackKeys = blackKeys[index : index+5]
-        if is_octave_pattern(lastFiveBlackKeys, meanBlackDistance):
-            print "First C# found at", lastFiveBlackKeys[0].Location
-            return
+        if is_octave_pattern(lastFiveBlackKeys):
+            firstCSharp = lastFiveBlackKeys[0]
+            print "First C# found at", firstCSharp.Location
+            index = 0
+            while whiteKeys[index].Location[0] < firstCSharp.Location[0]:
+                index += 1
+            firstC = whiteKeys[index - 1]
+            print "First C found at", firstC.Location
+            return index - 1
 
-    print "Couldn't compute first occurrence of C#"
+    print "Couldn't compute first occurrence of C"
+    exit(0)
+
+def get_C_indices():
+    CIndices = []
+    lastCIndex = get_index_of_first_C()
+    while lastCIndex < len(whiteKeys):
+        CIndices.append(lastCIndex)
+        lastCIndex += 7
+
+    print "C keys are present at:"
+    for index in CIndices:
+        print whiteKeys[index].Location
+
+    return CIndices
+
+# If there are an even number of Cs, returns the left middle one
+def get_middle_C(frame):
+    detect_all_black_keys(frame)
+    detect_all_white_keys(frame)
+    CIndices = get_C_indices()
+    middleCIndex = CIndices[(len(CIndices) - 1) / 2]
+    return whiteKeys[middleCIndex], whiteKeys, blackKeys
