@@ -18,7 +18,8 @@ def get_args():
         sys.exit(1)
 
     if args.video_file and args.url:
-        print "Local file and a URL has been provided. Disregarding the local file and performing conversion of URL ... "
+        print "Multiple inputs provided! Please select exactly one source for video - either local file or a URL"
+        sys.exit(1)
     elif args.video_file:
         if not os.path.exists(args.video_file):
             print "The path to local video file does not exist. Please check and try again."
