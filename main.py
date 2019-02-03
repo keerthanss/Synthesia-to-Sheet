@@ -18,8 +18,8 @@ def get_args():
 def run():
     args = get_args()
     list_of_frames = parse_video.get_frames(args.video_file)
-    (middleC, whiteKeys, blackKeys) = calibrate.get_middle_C(list_of_frames[0])
-    print "Middle C found at", middleC.Location
+    myPiano = Piano.Piano()
+    myPiano.calibrate(list_of_frames[0])
 
 if __name__ == '__main__':
     run()
