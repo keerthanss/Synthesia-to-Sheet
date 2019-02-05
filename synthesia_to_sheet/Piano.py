@@ -120,7 +120,7 @@ class Piano():
         exit(0)
 
     def populate_octaves(self):
-        # If the leftmost key is a C, then set the currentOctave to zero
+        # The leftmost key gets assigned to octave 1 irrespective of which key it is. Initialization of 'currentOctave' is done to make sure that happens even when the leftmost key is a C in which case the else condition is triggered and 'currentOctave' gets set to 1
         if self.keys[0] == self.keys[self.CIndices[0]]:
             currentOctave = 0
         else:
