@@ -50,8 +50,8 @@ def run():
         else:
             print "Video successfully downloaded"
     list_of_frames = parse_video.get_frames(args.video_file)
-    parse_video.display_frames(list_of_frames)
-    # do further processing
+    myPiano = Piano.Piano()
+    myPiano.calibrate(list_of_frames[0])
 
 if __name__ == '__main__':
     run()
