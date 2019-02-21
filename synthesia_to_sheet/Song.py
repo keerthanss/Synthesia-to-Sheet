@@ -12,7 +12,7 @@ class Song:
         self.length_of_song = 0 # stores the length of the key_presses
         return
 
-    def _process_frame(self, frame, kmeans_classifier, white_index, black_index):
+    def _identify_key_presses_in_frame(self, frame, kmeans_classifier, white_index, black_index):
         frame_colors = [ frame[ k.Location[1] ][ k.Location[0] ] for k in self.piano.keys ]
         labels = kmeans_classifier.predict(frame_colors)
         key_presses_in_frame = [ i for (i, _label) in enumerate(labels) if _label != white_index and _label != black_index ]
@@ -31,13 +31,13 @@ class Song:
         kmeans = KMeans(n_clusters=k).fit(colors)
         cluster_centers = kmeans.cluster_centers_
         cluster_centers_1D = np.sqrt(np.sum(np.square(cluster_centers), axis=1))
-        white_index = np.argmin(cluster_centers_1D)
-        black_index = np.argmax(cluster_centers_1D)
+        white_index = np.argmax(cluster_centers_1D)
+        black_index = np.argmin(cluster_centers_1D)
         return kmeans, white_index, black_index
 
     def process_video(self, list_of_frames):
         kmeans, white_index, black_index = self._train_kmeans(list_of_frames, k=4, train_size=500) # NOTE: k=4 if both hands are shown in different colors, else k=3.
-        find_keys_pressed = lambda frame: self._process_frame(frame, kmeans, white_index, black_index)
+        find_keys_pressed = lambda frame: self._identify_key_presses_in_frame(frame, kmeans, white_index, black_index)
         map(find_keys_pressed, list_of_frames)
 
         # Debug helper - Plis test and tell :P
