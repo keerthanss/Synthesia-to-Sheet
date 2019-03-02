@@ -52,6 +52,8 @@ def run():
     list_of_frames = parse_video.get_frames(args.video_file)
     myPiano = Piano.Piano()
     myPiano.calibrate(list_of_frames[0])
+    mySong  = Song.Song(myPiano)
+    mySong.process_video(list_of_frames)
 
 if __name__ == '__main__':
     run()

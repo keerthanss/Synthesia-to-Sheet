@@ -11,6 +11,7 @@ class Key():
         self.Location = location
         self.IsPressed = isPressed
         self.Duration = duration
+        self.Presses = [] # stores 3-lists of the form [hand, start_frame, end_frame]
 
     def is_left_of(self, key):
         return self.Location[0] < key.Location[0]
