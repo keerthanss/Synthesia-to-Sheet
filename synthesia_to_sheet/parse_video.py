@@ -6,7 +6,7 @@ def get_frames(video_file):
     i = 0
     while(cap.isOpened()):
         ret, frame = cap.read()
-        if i < 1000: #NOTE: temporary fix
+        if i < 750: #NOTE: temporary fix
             list_of_frames.append(frame)
             i += 1
         else:

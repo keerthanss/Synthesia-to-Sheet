@@ -174,6 +174,10 @@ class Piano():
             self.keys.append(self.whiteKeys[whiteIndex])
             whiteIndex += 1
 
+    def get_index_of_middle_C(self):
+        length = len(self.CIndices)
+        return self.CIndices[(length-1)/2]
+
     def calibrate(self, frame):
         self.detect_all_black_keys(frame)
         self.detect_all_white_keys(frame)

@@ -55,5 +55,14 @@ def run():
     mySong  = Song.Song(myPiano)
     mySong.process_video(list_of_frames)
 
+    #TODO: Currently passing a value that seems to be working well for a test video. Need to get the tempo programmatically
+    midiWriter = MIDIWriter.MIDIWriter(tempo=60*18)
+    middleCIndex = myPiano.get_index_of_middle_C()
+    noteOffset = midiWriter.addend_to_get_midi_note(middleCIndex)
+
+    midiWriter.record_key_presses(myPiano.keys, noteOffset, ClassDefinitions.Hand.Hand.Right)
+    midiWriter.record_key_presses(myPiano.keys, noteOffset, ClassDefinitions.Hand.Hand.Left)
+    midiWriter.write_midi_to_file()
+
 if __name__ == '__main__':
     run()

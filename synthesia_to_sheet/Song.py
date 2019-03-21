@@ -44,7 +44,6 @@ class Song:
         self.key_presses.append( key_presses_in_frame )
         self.length_of_song  += 1
         self._store_presses_in_key(self.length_of_song, key_presses_in_frame, labels)
-        print key_presses_in_frame
         return
 
     def _train_kmeans(self, list_of_frames, k=4, train_size=500):
