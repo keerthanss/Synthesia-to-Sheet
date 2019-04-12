@@ -4,8 +4,10 @@ import argparse
 import os
 import sys
 import youtube_dl
+import subprocess
 
 from synthesia_to_sheet import *
+from synthesia_to_sheet.bpm_detection import *
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -39,6 +41,12 @@ def download_video(url):
 
     return DOWNLOADED_FILENAME
 
+def fetch_audio(filename="out.mp4"):
+    AUDIO_FILENAME = "audio.wav"
+    command = "ffmpeg -i {} -ab 160k -ac 2 -ar 44100 -vn {}".format(filename, AUDIO_FILENAME)
+    subprocess.call(command, shell=True)
+    return AUDIO_FILENAME
+
 def run():
     args = get_args()
     if args.url:
@@ -49,20 +57,26 @@ def run():
             sys.exit(1)
         else:
             print "Video successfully downloaded"
+    else:
+        print "Video file found"
+    audio_file = fetch_audio(args.video_file)
+    tempo = get_bpm_from_audio(audio_file, 5)
+    print "Tempo detected ", tempo
     list_of_frames = parse_video.get_frames(args.video_file)
     myPiano = Piano.Piano()
     myPiano.calibrate(list_of_frames[0])
     mySong  = Song.Song(myPiano)
     mySong.process_video(list_of_frames)
+    print "Calibrated piano"
 
-    #TODO: Currently passing a value that seems to be working well for a test video. Need to get the tempo programmatically
-    midiWriter = MIDIWriter.MIDIWriter(tempo=60*18)
+    midiWriter = MIDIWriter.MIDIWriter(tempo=tempo)
     middleCIndex = myPiano.get_index_of_middle_C()
     noteOffset = midiWriter.addend_to_get_midi_note(middleCIndex)
 
     midiWriter.record_key_presses(myPiano.keys, noteOffset, ClassDefinitions.Hand.Hand.Right)
     midiWriter.record_key_presses(myPiano.keys, noteOffset, ClassDefinitions.Hand.Hand.Left)
     midiWriter.write_midi_to_file()
+    print "MIDI file created"
 
 if __name__ == '__main__':
     run()
