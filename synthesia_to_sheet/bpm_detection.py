@@ -137,7 +137,7 @@ def get_bpm_from_audio(filename, window):
         n=n+1; #counter for debug...
 
     bpm = numpy.median(bpms)
-    return bpm
+    return int(bpm)
     # print 'Completed.  Estimated Beats Per Minute:', bpm
     #
     # n = range(0,len(correl))
