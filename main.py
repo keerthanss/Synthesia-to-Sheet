@@ -62,14 +62,15 @@ def run():
     audio_file = fetch_audio(args.video_file)
     tempo = get_bpm_from_audio(audio_file, 5)
     print "Tempo detected ", tempo
-    list_of_frames = parse_video.get_frames(args.video_file)
+    list_of_frames, videoFPS = parse_video.get_frames(args.video_file)
+    framesPerBeat = videoFPS*60/tempo
     myPiano = Piano.Piano()
     myPiano.calibrate(list_of_frames[0])
     mySong  = Song.Song(myPiano)
     mySong.process_video(list_of_frames)
     print "Calibrated piano"
 
-    midiWriter = MIDIWriter.MIDIWriter(tempo=tempo)
+    midiWriter = MIDIWriter.MIDIWriter(framesPerBeat=framesPerBeat, tempo=tempo)
     middleCIndex = myPiano.get_index_of_middle_C()
     noteOffset = midiWriter.addend_to_get_midi_note(middleCIndex)
 

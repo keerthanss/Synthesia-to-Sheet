@@ -2,6 +2,7 @@ import cv2
 
 def get_frames(video_file):
     cap = cv2.VideoCapture(video_file)
+    videoFPS = cap.get(cv2.CAP_PROP_FPS)
     list_of_frames = []
     i = 0
     while(cap.isOpened()):
@@ -15,4 +16,4 @@ def get_frames(video_file):
     cap.release()
     cv2.destroyAllWindows()
 
-    return list_of_frames
+    return list_of_frames, int(videoFPS)
