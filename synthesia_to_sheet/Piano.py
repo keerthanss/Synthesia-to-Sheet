@@ -110,8 +110,11 @@ class Piano():
             lastFiveBlackKeys = self.blackKeys[index : index+5]
             if self.is_octave_pattern(lastFiveBlackKeys):
                 firstCSharp = lastFiveBlackKeys[0]
+                # If the first C# is the left most key on the keyboard, then the first C is present 12 notes away (since there are 12 notes per octave)
+                if not firstCSharp.is_right_of(self.keys[0]):
+                    return len(Note.Note) - 1
                 index = 0
-                while self.keys[index].Location[0] < firstCSharp.Location[0]:
+                while self.keys[index].is_left_of(firstCSharp):
                     index += 1
                 firstC = self.keys[index - 1]
                 return index - 1
@@ -127,7 +130,8 @@ class Piano():
             currentOctave = 1
         nextCIndex = 0
         for key in self.keys:
-            if key.is_left_of(self.keys[self.CIndices[nextCIndex]]):
+            # For a key which has no C present to its right on the keyboard (i.e a key such that the rightmost C is to the left of it), nextCIndex is outside our list of CIndices. So, in such a case, we add the key to the current octave (taken care of by the first condition in the below if statment)
+            if nextCIndex >= len(self.CIndices) or key.is_left_of(self.keys[self.CIndices[nextCIndex]]):
                 key.Octave = currentOctave
             else:
                 currentOctave += 1
