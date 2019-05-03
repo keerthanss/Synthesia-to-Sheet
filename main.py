@@ -73,7 +73,7 @@ def run():
     midiWriter = MIDIWriter.MIDIWriter(framesPerBeat=framesPerBeat, tempo=tempo)
     middleCIndex = myPiano.get_index_of_middle_C()
     noteOffset = midiWriter.addend_to_get_midi_note(middleCIndex)
-
+    
     midiWriter.record_key_presses(myPiano.keys, noteOffset, ClassDefinitions.Hand.Hand.Right)
     midiWriter.record_key_presses(myPiano.keys, noteOffset, ClassDefinitions.Hand.Hand.Left)
     midiWriter.write_midi_to_file()
